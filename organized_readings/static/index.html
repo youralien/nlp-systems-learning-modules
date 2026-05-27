@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Library Manager</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-card: #0f3460;
+            --text-primary: #eaeaea;
+            --text-secondary: #a0a0a0;
+            --accent: #e94560;
+            --accent-hover: #ff6b6b;
+            --success: #4ecca3;
+            --warning: #ffc107;
+            --border: #2a2a4a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .stat {
+            background: var(--bg-secondary);
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+
+        .stat-value {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        select {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-card);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background: var(--bg-card);
+        }
+
+        tr.selected {
+            background: var(--bg-card);
+            border-left: 3px solid var(--accent);
+        }
+
+        .title-cell {
+            max-width: 300px;
+        }
+
+        .title-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .title-link:hover {
+            color: var(--accent);
+        }
+
+        .notes-preview {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 280px;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .badge-to_read { background: #3a3a5a; color: #a0a0c0; }
+        .badge-to_review { background: #4a3a2a; color: #ffc107; }
+        .badge-reading { background: #2a4a3a; color: #4ecca3; }
+        .badge-read { background: #2a3a4a; color: #6eb5ff; }
+        .badge-synthesized { background: #3a2a4a; color: #b56eff; }
+        .badge-cited { background: #4a2a3a; color: #ff6eb5; }
+        .badge-noted { background: #3a3a3a; color: #a0a0a0; }
+        .badge-published { background: #2a4a2a; color: #6eff6e; }
+
+        /* Theme tag */
+        .theme-tag {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Detail Panel */
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: -500px;
+            width: 500px;
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .detail-panel.open {
+            right: 0;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+        }
+
+        .detail-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .detail-close:hover {
+            color: var(--accent);
+        }
+
+        .detail-content {
+            padding: 20px;
+        }
+
+        .detail-title {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .detail-field {
+            margin-bottom: 16px;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+        }
+
+        .detail-value a {
+            color: var(--accent);
+            word-break: break-all;
+        }
+
+        textarea.detail-input,
+        input.detail-input,
+        select.detail-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        textarea.detail-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 999;
+        }
+
+        .overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: var(--success);
+            color: white;
+            border-radius: 6px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background: var(--accent);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+        }
+
+        /* Source type icon */
+        .source-icon {
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            background: var(--bg-card);
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Research Library Manager</h1>
+            <div class="stats">
+                <div class="stat">Total: <span class="stat-value" id="total-count">0</span></div>
+                <div class="stat">To Read: <span class="stat-value" id="toread-count">0</span></div>
+                <div class="stat">Read: <span class="stat-value" id="read-count">0</span></div>
+            </div>
+        </header>
+
+        <div class="filters">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Search titles, authors, notes...">
+            </div>
+            <select id="theme-filter">
+                <option value="">All Themes</option>
+            </select>
+            <select id="status-filter">
+                <option value="">All Statuses</option>
+                <option value="to_read">To Read</option>
+                <option value="to_review">To Review</option>
+                <option value="reading">Reading</option>
+                <option value="read">Read</option>
+                <option value="synthesized">Synthesized</option>
+                <option value="cited">Cited</option>
+                <option value="noted">Noted</option>
+            </select>
+            <select id="source-filter">
+                <option value="">All Sources</option>
+                <option value="paper">Paper</option>
+                <option value="preprint">Preprint</option>
+                <option value="conference_paper">Conference</option>
+                <option value="blog_post">Blog</option>
+                <option value="social_media">Social Media</option>
+                <option value="industry_product">Industry</option>
+                <option value="github_repo">GitHub</option>
+            </select>
+            <button class="btn btn-secondary" onclick="exportBibtex()">Export BibTeX</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title & Notes</th>
+                        <th>Author</th>
+                        <th>Year</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Theme</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="readings-table">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="overlay" id="overlay" onclick="closeDetail()"></div>
+    <div class="detail-panel" id="detail-panel">
+        <div class="detail-header">
+            <h2>Paper Details</h2>
+            <button class="detail-close" onclick="closeDetail()">&times;</button>
+        </div>
+        <div class="detail-content" id="detail-content">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let readings = [];
+        let themes = [];
+        let selectedReading = null;
+
+        // Initialize
+        async function init() {
+            await loadThemes();
+            await loadReadings();
+            await loadStats();
+        }
+
+        async function loadThemes() {
+            const res = await fetch('/api/themes');
+            themes = await res.json();
+
+            const select = document.getElementById('theme-filter');
+            themes.forEach(theme => {
+                const opt = document.createElement('option');
+                opt.value = theme;
+                // Extract readable name from folder name
+                opt.textContent = theme.replace(/^\d+_/, '').replace(/_/g, ' ').slice(0, 40);
+                select.appendChild(opt);
+            });
+        }
+
+        async function loadReadings() {
+            const params = new URLSearchParams();
+            const search = document.getElementById('search').value;
+            const theme = document.getElementById('theme-filter').value;
+            const status = document.getElementById('status-filter').value;
+            const source = document.getElementById('source-filter').value;
+
+            if (search) params.append('search', search);
+            if (theme) params.append('theme', theme);
+            if (status) params.append('status', status);
+            if (source) params.append('source_type', source);
+
+            const res = await fetch(`/api/readings?${params}`);
+            readings = await res.json();
+            renderTable();
+        }
+
+        async function loadStats() {
+            const res = await fetch('/api/stats');
+            const stats = await res.json();
+
+            document.getElementById('total-count').textContent = stats.total;
+            document.getElementById('toread-count').textContent = stats.by_status.to_read || 0;
+            document.getElementById('read-count').textContent = (stats.by_status.read || 0) + (stats.by_status.synthesized || 0);
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('readings-table');
+
+            if (readings.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <h3>No readings found</h3>
+                                <p>Try adjusting your filters</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = readings.map(r => `
+                <tr class="${selectedReading?.id === r.id ? 'selected' : ''}" onclick="selectReading('${r.id}')">
+                    <td class="title-cell">
+                        <a href="${r.url || '#'}" target="_blank" class="title-link" onclick="event.stopPropagation()">
+                            ${escapeHtml(r.title || 'Untitled')}
+                        </a>
+                        ${r.user_notes ? `<div class="notes-preview">${escapeHtml(r.user_notes)}</div>` : ''}
+                    </td>
+                    <td>${escapeHtml(r.author || '-')}</td>
+                    <td>${r.year || '-'}</td>
+                    <td><span class="source-icon">${r.source_type || '-'}</span></td>
+                    <td><span class="badge badge-${r.status}">${r.status || '-'}</span></td>
+                    <td class="theme-tag" title="${r.theme_folder || ''}">${formatTheme(r.theme_folder)}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); openDetail('${r.id}')">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function formatTheme(theme) {
+            if (!theme) return '-';
+            return theme.replace(/^\d+_/, '').replace(/_/g, ' ').slice(0, 20) + '...';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function selectReading(id) {
+            selectedReading = readings.find(r => r.id === id);
+            renderTable();
+            openDetail(id);
+        }
+
+        async function openDetail(id) {
+            const res = await fetch(`/api/readings/${id}`);
+            const reading = await res.json();
+            selectedReading = reading;
+
+            const content = document.getElementById('detail-content');
+            content.innerHTML = `
+                <h3 class="detail-title">${escapeHtml(reading.title)}</h3>
+
+                ${reading.url ? `
+                <div class="detail-field">
+                    <div class="detail-label">URL</div>
+                    <div class="detail-value"><a href="${reading.url}" target="_blank">${reading.url}</a></div>
+                </div>
+                ` : ''}
+
+                <div class="detail-field">
+                    <div class="detail-label">Author</div>
+                    <input class="detail-input" id="edit-author" value="${escapeHtml(reading.author || '')}">
+                </div>
+
+                <div class="detail-field">
+                    <div class="detail-label">Year</div>
+                    <input class="detail-input" id="edit-year" value="${reading.year || ''}">
+                </div>
+
+                <div class="detail-field">
+                    <div class="detail-label">Status</div>
+                    <select class="detail-input" id="edit-status">
+                        ${['to_read', 'to_review', 'reading', 'read', 'synthesized', 'cited', 'noted', 'published']
+                            .map(s => `<option value="${s}" ${reading.status === s ? 'selected' : ''}>${s}</option>`)
+                            .join('')}
+                    </select>
+                </div>
+
+                <div class="detail-field">
+                    <div class="detail-label">Theme Folder</div>
+                    <select class="detail-input" id="edit-theme">
+                        ${themes.map(t => `<option value="${t}" ${reading.theme_folder === t ? 'selected' : ''}>${t.replace(/^\d+_/, '').replace(/_/g, ' ')}</option>`).join('')}
+                    </select>
+                </div>
+
+                <div class="detail-field">
+                    <div class="detail-label">Source Type</div>
+                    <select class="detail-input" id="edit-source">
+                        ${['paper', 'preprint', 'conference_paper', 'journal_article', 'book_chapter', 'thesis', 'blog_post', 'social_media', 'industry_product', 'github_repo', 'academic_website', 'workshop', 'job_posting', 'longitudinal_study', 'report']
+                            .map(s => `<option value="${s}" ${reading.source_type === s ? 'selected' : ''}>${s}</option>`)
+                            .join('')}
+                    </select>
+                </div>
+
+                <div class="detail-field">
+                    <div class="detail-label">Your Notes</div>
+                    <textarea class="detail-input" id="edit-notes">${escapeHtml(reading.user_notes || '')}</textarea>
+                </div>
+
+                <div class="detail-field">
+                    <div class="detail-label">Abstract</div>
+                    <textarea class="detail-input" id="edit-abstract">${escapeHtml(reading.abstract || '')}</textarea>
+                </div>
+
+                ${reading.doi ? `
+                <div class="detail-field">
+                    <div class="detail-label">DOI</div>
+                    <div class="detail-value">${reading.doi}</div>
+                </div>
+                ` : ''}
+
+                ${reading.scratchpad_line ? `
+                <div class="detail-field">
+                    <div class="detail-label">Scratchpad Line</div>
+                    <div class="detail-value">${reading.scratchpad_line}</div>
+                </div>
+                ` : ''}
+
+                <div class="detail-actions">
+                    <button class="btn btn-primary" onclick="saveReading('${reading.id}')">Save Changes</button>
+                    <button class="btn btn-secondary" onclick="closeDetail()">Cancel</button>
+                    <button class="btn btn-secondary" style="margin-left: auto; color: var(--accent);" onclick="deleteReading('${reading.id}')">Delete</button>
+                </div>
+            `;
+
+            document.getElementById('detail-panel').classList.add('open');
+            document.getElementById('overlay').classList.add('visible');
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-panel').classList.remove('open');
+            document.getElementById('overlay').classList.remove('visible');
+            selectedReading = null;
+            renderTable();
+        }
+
+        async function saveReading(id) {
+            const updates = {
+                author: document.getElementById('edit-author').value,
+                year: document.getElementById('edit-year').value,
+                status: document.getElementById('edit-status').value,
+                theme_folder: document.getElementById('edit-theme').value,
+                source_type: document.getElementById('edit-source').value,
+                user_notes: document.getElementById('edit-notes').value,
+                abstract: document.getElementById('edit-abstract').value,
+            };
+
+            const res = await fetch(`/api/readings/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+
+            if (res.ok) {
+                showToast('Changes saved!');
+                await loadReadings();
+                await loadStats();
+                closeDetail();
+            } else {
+                showToast('Error saving changes', true);
+            }
+        }
+
+        async function deleteReading(id) {
+            if (!confirm('Are you sure you want to delete this reading?')) return;
+
+            const res = await fetch(`/api/readings/${id}`, { method: 'DELETE' });
+
+            if (res.ok) {
+                showToast('Reading deleted');
+                await loadReadings();
+                await loadStats();
+                closeDetail();
+            } else {
+                showToast('Error deleting reading', true);
+            }
+        }
+
+        async function exportBibtex() {
+            window.open('/api/export/bibtex', '_blank');
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Event listeners
+        document.getElementById('search').addEventListener('input', debounce(loadReadings, 300));
+        document.getElementById('theme-filter').addEventListener('change', loadReadings);
+        document.getElementById('status-filter').addEventListener('change', loadReadings);
+        document.getElementById('source-filter').addEventListener('change', loadReadings);
+
+        function debounce(fn, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeDetail();
+        });
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

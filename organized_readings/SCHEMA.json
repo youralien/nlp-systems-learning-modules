@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Reading Entry",
+  "description": "Schema for bibliographic entries with custom research notes fields",
+  "type": "object",
+  "required": ["id", "entry_type", "title", "theme_folder", "source_type", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier, typically author_year_keyword format"
+    },
+    "entry_type": {
+      "type": "string",
+      "enum": ["article", "inproceedings", "book", "incollection", "misc", "techreport", "phdthesis", "mastersthesis", "industry", "software", "report"],
+      "description": "BibTeX entry type"
+    },
+    "author": {
+      "type": "string",
+      "description": "Author(s) in 'Last, First and Last, First' format"
+    },
+    "title": {
+      "type": "string",
+      "description": "Title of the work"
+    },
+    "year": {
+      "type": "string",
+      "description": "Publication year"
+    },
+    "isbn": {
+      "type": "string",
+      "description": "ISBN number"
+    },
+    "publisher": {
+      "type": "string",
+      "description": "Publisher name"
+    },
+    "address": {
+      "type": "string",
+      "description": "Publisher address"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Primary URL for the resource"
+    },
+    "social_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Social media link where you found this (Twitter, LinkedIn, etc.)"
+    },
+    "doi": {
+      "type": "string",
+      "description": "Digital Object Identifier"
+    },
+    "abstract": {
+      "type": "string",
+      "description": "Abstract or summary of the work"
+    },
+    "booktitle": {
+      "type": "string",
+      "description": "For inproceedings: name of the conference proceedings"
+    },
+    "journal": {
+      "type": "string",
+      "description": "For articles: name of the journal"
+    },
+    "volume": {
+      "type": "string",
+      "description": "Volume number"
+    },
+    "number": {
+      "type": "string",
+      "description": "Issue number"
+    },
+    "pages": {
+      "type": "string",
+      "description": "Page numbers"
+    },
+    "articleno": {
+      "type": "string",
+      "description": "Article number"
+    },
+    "numpages": {
+      "type": "string",
+      "description": "Number of pages"
+    },
+    "keywords": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Keywords/tags for the work"
+    },
+    "series": {
+      "type": "string",
+      "description": "Conference series (e.g., CHI '26)"
+    },
+    "theme_folder": {
+      "type": "string",
+      "description": "Which thematic folder this belongs to",
+      "enum": [
+        "01_ai_for_training_human_helpers_simulation_and_practice",
+        "02_technical_methods_for_ai_feedback_and_learning_systems",
+        "03_persuasion_behavior_change_and_user_acceptance",
+        "04_risks_and_dark_sides_of_ai_interaction_addiction_deskilling_technostress",
+        "05_relational_intelligence_and_human_likeness_in_ai",
+        "06_accessibility_inclusion_and_speech_interfaces",
+        "07_ai_therapy_efficacy_evidence_and_skepticism",
+        "08_ai_human_division_of_labor_and_complementarity",
+        "09_personalization_bias_and_cultural_adaptation_in_ai",
+        "10_simulated_users_and_synthetic_data_for_ai_training",
+        "11_learner_agency_autonomy_and_metrics"
+      ]
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["paper", "preprint", "conference_paper", "journal_article", "book_chapter", "thesis", "blog_post", "social_media", "industry_product", "github_repo", "academic_website", "workshop", "job_posting", "longitudinal_study", "report"],
+      "description": "Type of source material"
+    },
+    "user_notes": {
+      "type": "string",
+      "description": "Your personal notes about this reading"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["to_read", "to_review", "reading", "read", "synthesized", "cited", "noted", "published"],
+      "description": "Your reading/processing status"
+    },
+    "date_captured": {
+      "type": "string",
+      "format": "date",
+      "description": "When you added this to your collection"
+    },
+    "scratchpad_line": {
+      "type": "integer",
+      "description": "Line number in original research_scratchpad.md for reference"
+    }
+  }
+}
